@@ -12,10 +12,98 @@
 
 <body>
     <button type="button" class="btn btn-danger" onclick="logout()">Logout</button>
+    <table>
+        <tr>
+            <td>Id </td>
+            <td><input type="text" name="id" id="user_id" /></td>
+        </tr>
+        <tr>
+            <td>User Name: </td>
+            <td><input type="text" name="Type" id="user_name" /></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="button" value="Save" onclick="save_user();" />
+                <input type="button" value="Update" onclick="update_user();" />
+                <input type="button" value="Delete" onclick="dalete_user();" />
+            </td>
+        </tr>
+    </table>
 
-
+    <h3>User List</h3>
+    <table id="tbl_user_list" border="1">
+        <tr>
+            <td>#ID</td>
+            <td>NAME</td>
+        </tr>
+    </table>
     <script src=" https://www.gstatic.com/firebasejs/7.5.2/firebase.js"> </script>
-    <script src="FirebaseConfig.js">
+    <script src="FirebaseConfig.js"></script>
+
+    <script>
+
+        var tblUsers = document.getElementById('tbl_user_list');
+        var databaseRef = firebase.database().ref('Category/');
+        var rowIndex = 1;
+
+        databaseRef.once('value', function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+                var childKey = childSnapshot.key;
+                var childData = childSnapshot.val();
+
+                var row = tblUsers.insertRow(rowIndex);
+                var cellId = row.insertCell(0);
+                var cellName = row.insertCell(1);
+                cellId.appendChild(document.createTextNode(childKey));
+                cellName.appendChild(document.createTextNode(childData));
+
+                rowIndex = rowIndex + 1;
+            });
+        });
+
+        function save_user() {
+            var category = document.getElementById('user_name').value;
+
+            var uid = databaseRef.push().key;
+
+            var updates = {};
+            updates['/Category/' + uid] = category;
+            firebase.database().ref().update(updates);
+
+            alert('The user is created successfully !');
+            reload_page();
+
+        }
+        function update_user() {
+            var user_name = document.getElementById('user_name').value;
+            var user_id = document.getElementById('user_id').value;
+
+            var data = {
+                user_id: user_id,
+                user_name: user_name
+            }
+
+            var updates = {};
+            updates['/Category/' + user_id] = data;
+            firebase.database().ref().update(updates);
+
+            alert('The user is updated successfully !');
+
+            reload_page();
+        }
+        function dalete_user() {
+            var user_id = document.getElementById('user_id').value;
+
+            firebase.database().ref().child('/Category/' + user_id).remove();
+            alert('The user is dalete successfully !');
+            reload_page();
+
+        }
+        function reload_page() {
+            window.location.reload();
+        }
+    </script>
+
     </script>
 
     <script>
